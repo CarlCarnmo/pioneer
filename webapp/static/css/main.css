@@ -1,0 +1,104 @@
+box-sizing: border-box;
+
+body
+{
+	background-color: white;
+}
+h1 {
+	text-align: center;
+}
+h3 {
+    color: white;
+    font-family: Monaco, Monospace;
+}
+p {
+	text-align: center;
+	display: inline-block;
+}
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: white;
+}
+menu_header {
+	text-align: center;
+	height: 80px;
+}
+li {
+	background-color: white;
+	color: black;
+	float: left;
+	height: 40px;
+	width: 120px;
+	margin-top: 40px;
+}
+li a {
+    display: inline-block;
+    color: black;
+    text-align: center;
+    height: 40px;
+    width: 120px;
+    text-decoration: none;
+    padding: 14px 0px 0px;
+    font-size: 25px;
+    font-family: Arial, sans-serif;
+    font-weight: normal;
+}
+li a:hover{
+  background-color: white;
+  color: #489d93;
+}
+.hr1{
+    margin-top: 40px;
+}
+.bookBody{
+    display: block;
+    width: 100%
+	background: white;
+	margin-top: 40px;
+	align-items: center;
+}
+.logBook{
+    background: white;
+    margin-left: 20%;
+    display: flex;
+}
+.logBookHeader{
+    background: #489d93;
+    height: 50px;
+    width: 25%;
+    float: left;
+    border: 1px solid;
+    border-color: grey;
+    text-align: center;
+    box-sizing: border-box;
+}
+bh {
+    text-align: center;
+	display: inline-block;
+}
+.pageNumbersArea {
+    height: 60px;
+    margin-left: 15%;
+	margin-right: 15%;
+	margin-bottom: 100px;
+	position: relative
+}
+.center {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  text-align: center;
+}
+.left {
+  position: absolute;
+  top: 50%;
+  left: 5px;
+}
+.right {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+}
