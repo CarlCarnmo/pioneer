@@ -14,7 +14,7 @@ def connect_to_database():
 def index():
     conn = connect_to_database()
     cur = conn.cursor()
-    cur.execute('SELECT rfid, esd, timestamp FROM esd_log.esd_check ORDER BY timestamp DESC;')
+    cur.execute('SELECT rfid, esd, timestamp FROM esd_log.esd_check ORDER BY timestamp ASC;')
     datatest = cur.fetchall()
     cur.close()
     conn.close()
