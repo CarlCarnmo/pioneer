@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Veoneer log book</title>
+		<meta charset='utf-8'>
+		<meta name='viewport' content='width=device-width, initial-scale=1'>
+		<link rel="stylesheet" href="{{ url_for('static', filename='/css/main.css') }}">
+		<script>
+			dbArray = []
+			{% for col in data %}
+			dbArray.push("{{col[0]}},{{col[1]}},{{col[2]}}")
+			{% endfor %}
+		</script>
+	</head>
+	<body>
+	<ul>
+		<menu_header>
+			<li><a onclick="#">Home</a></li>
+			<li><a onclick="#">Statistics</a></li>
+			<img src="{{url_for('static', filename='/img/veoneer_logo.png')}}" alt="Veoneer" align="right">
+		</menu_header>
+	</ul>
+	<hr class="hr1">
+	<div id="bookBodyId" class='bookBody'>
+
+		<div id="logBookId" class="logBook">
+			<div class="logBookHeader" style="border-top-left-radius: 15% 50%"><h3>Id</h3></div>
+			<div class="logBookHeader"><h3>ESD</h3></div>
+			<div class="logBookHeader" style="border-top-right-radius: 15% 50%"><h3>Time</h3></div>
+		</div>
+
+	</div>
+	<div id="pageNumbersAreaId" class="pageNumbersArea">
+		<div id="numbersAreaId" class="center"></div>
+	</div>
+	<script src="{{ url_for('static', filename='/js/main.js') }}"></script>
+	</body>
+</html>
