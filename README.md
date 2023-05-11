@@ -44,7 +44,7 @@ This project aims to create a system for monitoring ESD (Electrostatic Discharge
      ```
    - Switch to the 'postgres' user:
      ```
-     sudo su postgres
+     su postgres
      ```
    - Create a PostgreSQL user 'pioneer':
      ```
@@ -55,8 +55,13 @@ This project aims to create a system for monitoring ESD (Electrostatic Discharge
      psql
      create database pioneer;
      ```
-   - Create the 'esd_log' schema if needed:
+   - Switch to the 'pioneer' user:
      ```
+     su pioneer
+     ```
+   - Create the 'esd_log' schema:
+     ```
+     psql
      CREATE SCHEMA IF NOT EXISTS esd_log;
      ```
    - Create the 'esd_check' table within the 'esd_log' schema:
