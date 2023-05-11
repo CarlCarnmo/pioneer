@@ -12,7 +12,7 @@ function loadLogBook()
     var pagesArea = document.getElementById("pageNumbersAreaId");
     var numbersArea = document.getElementById("numbersAreaId");
     // Log book table
-    boxNames = []
+    const boxNames = []
     for (var i = 0; i <= rows - 1; i++)
     {
         var logBook = document.createElement('div');
