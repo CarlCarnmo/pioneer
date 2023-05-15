@@ -94,11 +94,19 @@ bh {
 }
 .left {
   position: absolute;
-  top: 50%;
-  left: 5px;
+  top: 60%;
+  left: 10%;
 }
 .right {
   position: absolute;
-  top: 50%;
-  right: 5px;
+  top: 60%;
+  right: 10%;
+}
+.viewDays{
+    margin-left: 20%;
+    margin-bottom: 20px;
+    display: flex;
+}
+.forms{
+    margin-left: 20px;
 }
