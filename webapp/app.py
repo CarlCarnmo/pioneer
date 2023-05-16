@@ -14,11 +14,19 @@ def connect_to_database():
     return connection
 @app.route('/', methods=['GET', 'POST'])
 def main():
+    sort = "timestamp"
     table_rows = 10
-    sortBy = ""
+    where_ = ""
     db_array = []
 
     if request.method == 'POST':
+        sort_selected = request.form.get('sort_select')
+        if (sort_selected == "rfid"):
+            sort = "rfid"
+        if (sort_selected == "esd"):
+            sort = "esd"
+        if (sort_selected == "time"):
+            sort = "timestamp"
 
         rows_selected = request.form.get('rows_form')
         if (rows_selected == "10"):
@@ -28,21 +36,21 @@ def main():
         elif (rows_selected == "40"):
             table_rows = 40
 
-        sort_selected = request.form.get('sort_select')
-        if (sort_selected == "today"):
-            sortBy = "WHERE timestamp >= CURRENT_DATE"
-        if (sort_selected == "this_week"):
-            sortBy = "WHERE timestamp >= date_trunc('week',current_date)"
-        if (sort_selected == "this_month"):
-            sortBy = "WHERE timestamp >= date_trunc('month', CURRENT_DATE)"
-        if (sort_selected == "last_week"):
-            sortBy = "WHERE (timestamp >= date_trunc('week', CURRENT_TIMESTAMP - interval '1 week') and timestamp < date_trunc('week', CURRENT_TIMESTAMP))"
-        if (sort_selected == "last_month"):
-            sortBy = "WHERE (timestamp >= date_trunc('week', CURRENT_TIMESTAMP - interval '1 month') and timestamp < date_trunc('month', CURRENT_TIMESTAMP))"
+        view = request.form.get('view_time')
+        if (view == "today"):
+            where_ = "WHERE timestamp >= CURRENT_DATE"
+        if (view == "this_week"):
+            where_ = "WHERE timestamp >= date_trunc('week',current_date)"
+        if (view == "this_month"):
+            where_ = "WHERE timestamp >= date_trunc('month', CURRENT_DATE)"
+        if (view == "last_week"):
+            where_ = "WHERE (timestamp >= date_trunc('week', CURRENT_TIMESTAMP - interval '1 week') and timestamp < date_trunc('week', CURRENT_TIMESTAMP))"
+        if (view == "last_month"):
+            where_ = "WHERE (timestamp >= date_trunc('week', CURRENT_TIMESTAMP - interval '1 month') and timestamp < date_trunc('month', CURRENT_TIMESTAMP))"
 
     conn = connect_to_database()
     cur = conn.cursor()
-    cur.execute(f'SELECT rfid, esd, timestamp FROM esd_log.esd_check {sortBy} ORDER BY timestamp DESC;')
+    cur.execute(f'SELECT rfid, esd, timestamp FROM esd_log.esd_check {where_} ORDER BY {sort} DESC;')
     datatest = cur.fetchall()
     cur.close()
     conn.close()
