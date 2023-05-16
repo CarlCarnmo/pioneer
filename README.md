@@ -11,8 +11,9 @@ This project aims to create a system for monitoring ESD (Electrostatic Discharge
 - Raspberry Pi OS (latest version)
 - PostgreSQL
 - XRDP (for remote desktop access)
-- Gunicorn (Python WSGI HTTP Server)
-- Python libraries: `psycopg2`, `flask`, `RPi-GPIO` (for hardware interaction)
+- `Gunicorn` (Python WSGI HTTP Server)
+- Python libraries: `psycopg2`, `RPi-GPIO` (for hardware interaction)
+- Web requirements: `flask`
 
 ### Step-by-Step Installation and Setup
 
