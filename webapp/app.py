@@ -13,18 +13,19 @@ def connect_to_database():
     )
     return connection
 @app.route('/', methods=['GET', 'POST'])
-def index():
+def main():
+    table_rows = 10
+    sortBy = ""
     db_array = []
-    table_rows = ""
+
     if request.method == 'POST':
-        sortBy = ""
 
         rows_selected = request.form.get('rows_form')
         if (rows_selected == "10"):
             table_rows = 10
-        if (rows_selected == "20"):
+        elif (rows_selected == "20"):
             table_rows = 20
-        if (rows_selected == "40"):
+        elif (rows_selected == "40"):
             table_rows = 40
 
         sort_selected = request.form.get('sort_select')
@@ -39,15 +40,20 @@ def index():
         if (sort_selected == "last_month"):
             sortBy = "WHERE (timestamp >= date_trunc('week', CURRENT_TIMESTAMP - interval '1 month') and timestamp < date_trunc('month', CURRENT_TIMESTAMP))"
 
-        conn = connect_to_database()
-        cur = conn.cursor()
-        cur.execute(f'SELECT rfid, esd, timestamp FROM esd_log.esd_check {sortBy} ORDER BY timestamp DESC;')
-        datatest = cur.fetchall()
-        cur.close()
-        conn.close()
-        for result in datatest:
-            db_array.append(result)
+    conn = connect_to_database()
+    cur = conn.cursor()
+    cur.execute(f'SELECT rfid, esd, timestamp FROM esd_log.esd_check {sortBy} ORDER BY timestamp DESC;')
+    datatest = cur.fetchall()
+    cur.close()
+    conn.close()
+    for result in datatest:
+        db_array.append(result)
     return render_template('index.html', data=db_array, table_rows=table_rows)
+
+@app.route('/stats')
+def stats():
+    return render_template('statistics.html')
+
 
 
 if __name__ == '__main__':
