@@ -102,11 +102,14 @@ bh {
   top: 60%;
   right: 10%;
 }
-.viewDays{
+.form1{
     margin-left: 20%;
     margin-bottom: 20px;
     display: flex;
 }
-.forms{
+.select_form1{
+    width: 100px;
+}
+.form_in{
     margin-left: 20px;
 }
