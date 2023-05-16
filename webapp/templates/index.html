@@ -9,6 +9,7 @@
 			dbArray = []
 			{% for col in data %}
 			dbArray.push("{{col[0]}},{{col[1]}},{{col[2]}}")
+			dbArray.push("{{col[0]}},{{col[1]}},{{col[2]}}")
 			{% endfor %}
 			// Table colums and rows
 			var cols = 3;
@@ -29,10 +30,10 @@
 	</ul>
 	<hr class="hr1">
 	<div id="bookBodyId" class='bookBody'>
-		<form class="viewDays" method="POST">
+		<form class="form1" method="POST">
 			<div>
-				<select name="sort_select">
-					<option value="sort">Sort by</option>
+				<select name="view_time" class="select_form1">
+					<option value="sort">View by</option>
 					<option value="today">Today</option>
 					<option value="this_week">This week</option>
 					<option value="this_month">This month</option>
@@ -40,15 +41,23 @@
 					<option value="last_month">Last month</option>
 				</select>
 			</div>
-			<div class="forms">
-				<select name="rows_form">
+			<div class="form_in">
+				<select name="sort_select" class="select_form1">
+					<option value="sort">Sort by</option>
+					<option value="rfid">Id</option>
+					<option value="esd">ESD</option>
+					<option value="time">Time</option>
+				</select>
+			</div>
+			<div class="form_in">
+				<select name="rows_form" class="select_form1">
 					<option value="sort_rows">Table rows</option>
 					<option value="10">10</option>
 					<option value="20">20</option>
 					<option value="40">40</option>
 				</select>
 			</div>
-			<button type="submit" class="forms">Filter</button>
+			<button type="submit" class="form_in">Filter</button>
 		</form>
 		<div id="logBookId" class="logBook">
 			<div class="logBookHeader" style="border-top-left-radius: 15% 50%"><h3>Id</h3></div>
