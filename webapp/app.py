@@ -8,25 +8,31 @@ def connect_to_database():
     connection = psycopg2.connect(
         host='localhost',
         database='pioneer',
-        user='pioneer',
-        password='password'
+        user='postgres',
+        password='Jivot321'
     )
     return connection
 @app.route('/', methods=['GET', 'POST'])
 def main():
-    sort = "timestamp"
+    sort = "timestamp DESC"
     table_rows = 10
     where_ = ""
     db_array = []
 
     if request.method == 'POST':
         sort_selected = request.form.get('sort_select')
-        if (sort_selected == "rfid"):
-            sort = "rfid"
-        if (sort_selected == "esd"):
-            sort = "esd"
-        if (sort_selected == "time"):
-            sort = "timestamp"
+        if (sort_selected == "rfid_high"):
+            sort = "rfid DESC"
+        if (sort_selected == "rfid_low"):
+            sort = "rfid ASC"
+        if (sort_selected == "esd_high"):
+            sort = "esd DESC"
+        if (sort_selected == "esd_low"):
+            sort = "esd ASC"
+        if (sort_selected == "time_high"):
+            sort = "timestamp DESC"
+        if (sort_selected == "time_low"):
+            sort = "timestamp ASC"
 
         rows_selected = request.form.get('rows_form')
         if (rows_selected == "10"):
@@ -50,7 +56,7 @@ def main():
 
     conn = connect_to_database()
     cur = conn.cursor()
-    cur.execute(f'SELECT rfid, esd, timestamp FROM esd_log.esd_check {where_} ORDER BY {sort} DESC;')
+    cur.execute(f'SELECT rfid, esd, timestamp FROM esd_log.esd_check {where_} ORDER BY {sort};')
     datatest = cur.fetchall()
     cur.close()
     conn.close()
