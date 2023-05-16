@@ -8,8 +8,8 @@ def connect_to_database():
     connection = psycopg2.connect(
         host='localhost',
         database='pioneer',
-        user='postgres',
-        password='Jivot321'
+        user='pioner',
+        password='password'
     )
     return connection
 @app.route('/', methods=['GET', 'POST'])
