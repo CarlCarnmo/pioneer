@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Veoneer log book</title>
+		<meta charset='utf-8'>
+		<meta name='viewport' content='width=device-width, initial-scale=1'>
+		<link rel="stylesheet" href="{{ url_for('static', filename='/css/main.css') }}">
+		<script>
+			dbArray = []
+			{% for col in data %}
+			dbArray.push("{{col[0]}},{{col[1]}},{{col[2]}}")
+			{% endfor %}
+			// Table colums and rows
+			var cols = 3;
+			var rows = {{ table_rows }}
+			var boxNames = []
+			// Count existing pages (Math.ceil make decimal number into integer)
+			var existingPages = Math.ceil( dbArray.length / rows );
+			var rows_in_choosen_page = [rows]
+		</script>
+	</head>
+	<body>
+	<ul>
+		<menu_header>
+			<li><a href="#">Home</a></li>
+			<li><a href="{{ url_for('stats') }}">Statistics</a></li>
+			<img src="{{url_for('static', filename='/img/veoneer_logo.png')}}" alt="Veoneer" align="right">
+		</menu_header>
+	</ul>
+	<hr class="hr1">
+	<div id="bookBodyId" class='bookBody'>
+		<h1>Statistics page</h1>
+	</div>
+	<script src="{{ url_for('static', filename='/js/main.js') }}"></script>
+	</body>
+</html>
