@@ -2,6 +2,7 @@ window.onload = loadLogBook();
 
 function loadLogBook()
 {
+    document.getElementById("previousArrow").style.display = "none"
     // Existing element declaration
     var bookBody = document.getElementById('bookBodyId');
     var pagesArea = document.getElementById("pageNumbersAreaId");
@@ -38,7 +39,7 @@ function loadLogBook()
     var page1 = document.getElementById("pagenumber1");
     page1.style = "color: #489d93; margin: 5px; font-size: 32px; font-family: Monaco, Monospace; font-weight: bold; float: none";
 
-    document.getElementById("previousArrow").style.display = "none"
+
 }
 //Browsing page function
 function changeSide(pageNum)
@@ -108,6 +109,7 @@ function changeSide(pageNum)
     {
         document.getElementById("previousArrow").style.display = "block"
     }
+    console.log(rows_in_choosen_page)
 }
 // Next page browsing function
 function nextArrow()
@@ -123,7 +125,6 @@ function nextArrow()
         }
     }
     changeSide(num + 1)
-    console.log(existingPages)
 }
 // Previous page browsing function
 function previousArrow()
