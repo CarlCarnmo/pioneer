@@ -2,25 +2,26 @@ import RPi.GPIO as GPIO
 import time
 import random
 import psycopg2
+from pioneer import config
 
 # Configs
-RFID_IO = 19
-ESD_IO = 26
-RED_LED = 16
-YELLOW_LED = 20
-GREEN_LED = 21
-psql_host = "localhost"
-psql_database = "pioneer"
-psql_user = "pioneer"
-psql_password = "password"
+# RFID_IO = 19
+# ESD_IO = 26
+# RED_LED = 16
+# YELLOW_LED = 20
+# GREEN_LED = 21
+# psql_host = "localhost"
+# psql_database = "pioneer"
+# psql_user = "pioneer"
+# psql_password = "password"
 
 # Connect to the PostgreSQL database
 def connect_to_database():
     connection = psycopg2.connect(
-        host=psql_host,
-        database=psql_database,
-        user=psql_user,
-        password=psql_password
+        host=config.psql_host,
+        database=config.psql_database,
+        user=config.psql_user,
+        password=config.psql_password
     )
     return connection
 
@@ -69,12 +70,12 @@ def esd_button_callback(channel):
 
 # Set up GPIO
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(RFID_IO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(ESD_IO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(config.RFID_IO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(config.ESD_IO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # Add event detection for button presses
-GPIO.add_event_detect(RFID_IO, GPIO.FALLING, callback=rfid_button_callback, bouncetime=200)
-GPIO.add_event_detect(ESD_IO, GPIO.FALLING, callback=esd_button_callback, bouncetime=200)
+GPIO.add_event_detect(config.RFID_IO, GPIO.FALLING, callback=rfid_button_callback, bouncetime=200)
+GPIO.add_event_detect(config.ESD_IO, GPIO.FALLING, callback=esd_button_callback, bouncetime=200)
 
 # Initialize the database connection
 db_connection = connect_to_database()
