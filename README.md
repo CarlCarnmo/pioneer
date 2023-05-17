@@ -74,6 +74,20 @@ This project aims to create a system for monitoring ESD (Electrostatic Discharge
          timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
      );
      ```
+5. **Install remaining requirements**
+   - Psycopg2: PostgreSQL adapter for Python.
+     ```
+     sudo apt install python3-psycopg2
+     ```
+   - Gunicorn: Webserver.
+     ```
+     sudo apt install gunicorn
+     ```
+   - Flask: web application framework.
+     ```
+     sudo apt install python3-flask
+     ```
+   
 
 ### Configuration
 
