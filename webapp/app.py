@@ -1,15 +1,16 @@
 from flask import Flask, render_template, request
 import psycopg2
+from pioneer import config
 
 app = Flask(__name__)
 
 # Establishes a connection to the PostgreSQL database
 def connect_to_database():
     connection = psycopg2.connect(
-        host='localhost',
-        database='pioneer',
-        user='pioneer',
-        password='password'
+        host=config.psql_host,
+        database=config.psql_database,
+        user=config.psql_user,
+        password=config.psql_password
     )
     return connection
 
