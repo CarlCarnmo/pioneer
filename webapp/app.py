@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 import psycopg2, os
 
 app = Flask(__name__)
-app.config.from_pyfile(os.path.join(".", "config/config.conf"), silent=False)
+app.config.from_pyfile(os.path.join(".", "config.py"), silent=False)
 
 # Connect to the database
 conn = psycopg2.connect(app.config.get("DB_CONNECTION"))
