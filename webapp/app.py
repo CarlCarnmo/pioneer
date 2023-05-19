@@ -1,18 +1,12 @@
 from flask import Flask, render_template, request
-import psycopg2
-from pioneer import config
+import psycopg2, os
 
 app = Flask(__name__)
+app.config.from_pyfile(os.path.join(".", "config/config.conf"), silent=False)
 
-# Establishes a connection to the PostgreSQL database
-def connect_to_database():
-    connection = psycopg2.connect(
-        host=config.psql_host,
-        database=config.psql_database,
-        user=config.psql_user,
-        password=config.psql_password
-    )
-    return connection
+# Connect to the database
+conn = psycopg2.connect(app.config.get("DB_CONNECTION"))
+cur = conn.cursor()
 
 @app.route('/', methods=['GET', 'POST'])
 def main():
@@ -61,10 +55,6 @@ def main():
         elif view == "last_month":
             where_ = "WHERE (timestamp >= date_trunc('week', CURRENT_TIMESTAMP - interval '1 month') " \
                      "and timestamp < date_trunc('month', CURRENT_TIMESTAMP))"
-
-    # Connect to the database
-    conn = connect_to_database()
-    cur = conn.cursor()
 
     # Execute the SQL query with formatted timestamp
     cur.execute(f"SELECT rfid, esd, TO_CHAR(timestamp, 'YYYY-MM-DD HH:MI:SS') AS formatted_timestamp "
