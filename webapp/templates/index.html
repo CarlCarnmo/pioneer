@@ -23,17 +23,17 @@
 	<body>
 	<ul>
 		<menu_header>
-			<li><a href="#">Home</a></li>
+			<li><a href="{{ url_for('main') }}">Home</a></li>
 			<li><a href="{{ url_for('stats') }}">Statistics</a></li>
 			<img src="{{url_for('static', filename='/img/veoneer_logo.png')}}" alt="Veoneer" align="right">
 		</menu_header>
 	</ul>
 	<hr class="hr1">
-	<div id="bookBodyId" class='bookBody'>
+	<div id="bodyId" class='body'>
 		<form class="form1" method="POST">
 			<div>
 				<select name="view_time" class="select_form1">
-					<option value="sort">View by</option>
+					<option value="" disabled selected hidden>View by</option>
 					<option value="today">Today</option>
 					<option value="this_week">This week</option>
 					<option value="this_month">This month</option>
@@ -43,7 +43,7 @@
 			</div>
 			<div class="form_in">
 				<select name="sort_select" class="select_form1">
-					<option value="sort">Sort by</option>
+					<option value="" disabled selected hidden>Sort by</option>
 					<option value="time_high">Time (newest to oldest)</option>
 					<option value="time_low">Time (oldest to newest)</option>
 					<option value="rfid_high">Id (high)</option>
@@ -54,7 +54,7 @@
 			</div>
 			<div class="form_in">
 				<select name="rows_form" class="select_form1">
-					<option value="sort_rows">Table rows</option>
+					<option value="" disabled selected hidden>Table rows</option>
 					<option value="10">10</option>
 					<option value="20">20</option>
 					<option value="40">40</option>

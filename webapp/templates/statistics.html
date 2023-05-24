@@ -5,18 +5,47 @@
 		<meta charset='utf-8'>
 		<meta name='viewport' content='width=device-width, initial-scale=1'>
 		<link rel="stylesheet" href="{{ url_for('static', filename='/css/main.css') }}">
+		<script src="{{ url_for('static', filename='/js/chart.js') }}"></script>
+		<script>
+			calTtl = "{{cal}}"
+			dgtTtl = "{{dgt}}"
+			sum_total = {{esd_total}}.reduce((a, b) => a + b, 0);
+			sum_esd_true = {{esd_true}}.reduce((a, b) => a + b, 0);
+			sum_esd_false = {{esd_false}}.reduce((a, b) => a + b, 0);
+			labels_data = {{ labels | safe }};
+			data1 = {{ esd_false | safe }};
+			data2 = {{ esd_true | safe }};
+		</script>
 	</head>
 	<body>
 	<ul>
 		<menu_header>
-			<li><a href="#">Home</a></li>
+			<li><a href="{{ url_for('main') }}">Home</a></li>
 			<li><a href="{{ url_for('stats') }}">Statistics</a></li>
 			<img src="{{url_for('static', filename='/img/veoneer_logo.png')}}" alt="Veoneer" align="right">
 		</menu_header>
 	</ul>
-	<hr class="hr1">
-	<div class="center">
-		<h1>Statistics page</h1>
-	</div>
+   <hr class="hr1">
+   <div id="bodyId" class='body'>
+	   <div class="statistics-bar">
+		   <form class="form3" method="POST">
+			   <input type="text" name="rfid_stat" placeholder=" RFID">
+			   <input type="submit" value="Check">
+		   </form>
+		   <form class="form2" method="POST">
+			   <button class="statsButton" id="dailyId" name="statsBtn" value="daily" type="submit"
+					   style="border-top-left-radius: 15% 50%;border-bottom-left-radius: 15% 50%;">Daily</button>
+			   <button class="statsButton" id="weeklyId" name="statsBtn" value="weekly" type="submit">Weekly</button>
+			   <button class="statsButton" id="monthlyId" name="statsBtn" value="monthly" type="submit">Monthly</button>
+			   <button class="statsButton" id="yearlyId" name="statsBtn" value="yearly" type="submit"
+					   style="border-top-right-radius: 15% 50%;border-bottom-right-radius: 15% 50%;">Yearly</button>
+		   </form>
+	   </div>
+
+	   <div id="chart-containerId" class="chart-container" style="position: relative; height:70vh; width:90vw">
+		   <canvas id="chart_display"></canvas>
+	   </div>
+   </div>
+	<script src="{{ url_for('static', filename='/js/statics.js') }}"></script>
 	</body>
 </html>
