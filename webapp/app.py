@@ -1,20 +1,21 @@
-from flask import Flask, render_template, request
-import psycopg2, os
+from flask import Flask, render_template, request, redirect, url_for
+import psycopg2, os, datetime
 
 app = Flask(__name__)
 app.config.from_pyfile(os.path.join(".", "config.py"), silent=False)
 
 # Connect to the database
 conn = psycopg2.connect(app.config.get("DB_CONNECTION"))
-cur = conn.cursor()
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
+def hello():
+    return redirect(url_for('main'))
+@app.route('/index', methods=['GET', 'POST'])
 def main():
     # Default sorting and table row values
     sort = "timestamp DESC"
     table_rows = 10
     where_ = ""
-    db_array = []
 
     if request.method == 'POST':
         # Handle sorting selection
@@ -57,6 +58,7 @@ def main():
                      "and timestamp < date_trunc('month', CURRENT_TIMESTAMP))"
 
     # Execute the SQL query with formatted timestamp
+    cur = conn.cursor()
     cur.execute(f"SELECT rfid, esd, TO_CHAR(timestamp, 'YYYY-MM-DD HH:MI:SS') AS formatted_timestamp "
                 f"FROM esd_log.esd_check {where_} ORDER BY {sort};")
 
@@ -65,17 +67,74 @@ def main():
 
     # Close the cursor and the database connection
     cur.close()
-    conn.close()
 
     # Store the results in a list
     db_array = [result for result in datatest]
 
     # Render the template with data and table_rows
     return render_template('index.html', data=db_array, table_rows=table_rows)
-
-@app.route('/stats')
+@app.route('/stats', methods=['GET', 'POST'])
 def stats():
-    return render_template('statistics.html')
+    # Default statistic
+    cal = "day"
+    dgt = "30"
+    prd = "TO_CHAR(cte.period::date, 'DD-MM-YYYY')"
+    rfid = ""
+    if request.method == 'POST':
+        # Handle rfid statistic check
+        text = request.form.get('rfid_stat')
+        if text is not None:
+            rfid = f"WHERE rfid = '{text}'"
+            cal = "month"
+            dgt = "12"
+            prd = "TO_CHAR(cte.period::date, 'YYYY-MM')"
+        # Handle daily, weekly, monthly and yearly statistics
+        stats_selected = request.form.get('statsBtn')
+        if stats_selected == "daily":
+            cal = "day"
+            dgt = "30"
+            prd = "TO_CHAR(cte.period::date, 'DD-MM-YYYY')"
+        elif stats_selected == "weekly":
+            cal = "week"
+            dgt = "26"
+            prd = "TO_CHAR(cte.period::date, 'WW')"
+        elif stats_selected == "monthly":
+            cal = "month"
+            dgt = "12"
+            prd = "TO_CHAR(cte.period::date, 'YYYY-MM')"
+        elif stats_selected == "yearly":
+            cal = "year"
+            dgt = "5"
+            prd = "TO_CHAR(cte.period::date, 'YYYY')"
+    # Execute the SQL query
+    cur = conn.cursor()
+    cur.execute("WITH RECURSIVE "
+    f"cte AS ( SELECT date_trunc('{cal}', now() - interval '{dgt} {cal}' + interval '1 {cal}') AS period "
+             "UNION ALL "
+             f"SELECT period + INTERVAL '1 {cal}' "
+             "FROM cte "
+             f"WHERE period < date_trunc('{cal}', now()) ) "
+    "select "
+      f"{prd}, "
+      "count(distinct timestamp) as all_tests, "
+      "count(*) filter (where esd) as esd_true, "
+      "count(*) filter (where not esd) as esd_false "
+    "from cte "
+    f"LEFT JOIN esd_log.esd_check on cte.period = date_trunc('{cal}', timestamp) "
+    f"{rfid}"
+    "group by cte.period::date;")
+    # Fetch all the data from database
+    dataDB = cur.fetchall()
+    # Close cursor and database connection
+    cur.close()
+    # Store data in arrays
+    data = [result for result in dataDB]
+    labels = [row[0] for row in data]
+    esd_total = [row[1] for row in data]
+    esd_true = [row[2] for row in data]
+    esd_false = [row[3] for row in data]
+    return render_template('statistics.html', labels=labels, esd_true=esd_true, esd_false=esd_false,
+                           esd_total=esd_total, dgt=dgt, cal=cal)
 
 if __name__ == '__main__':
     app.run(debug=True)
