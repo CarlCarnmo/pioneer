@@ -4,7 +4,7 @@ function loadLogBook()
 {
     document.getElementById("previousArrow").style.display = "none"
     // Existing element declaration
-    var bookBody = document.getElementById('bookBodyId');
+    var bookBody = document.getElementById('bodyId');
     var pagesArea = document.getElementById("pageNumbersAreaId");
     var numbersArea = document.getElementById("numbersAreaId");
     // Log book table
@@ -44,7 +44,7 @@ function loadLogBook()
 //Browsing page function
 function changeSide(pageNum)
 {
-    var bookBody = document.getElementById('bookBodyId');
+    var bookBody = document.getElementById('bodyId');
     var start = (pageNum - 1)*rows
     var left_rows = dbArray.length - (pageNum-1)*rows
     var end, new_rows, add_rows_to_choosen_page;
