@@ -3,22 +3,38 @@ window.onload = dailyGraph();
 function dailyGraph()
 {
     // Handle menu color
-    if (calTtl == "day"){
+    var daily =  document.getElementById('dailyId');
+    if (typeof(daily) != 'undefined' && daily != null)
+    {
+      if (calTtl == "day"){
             document.getElementById("dailyId").style.color = "black";
             document.getElementById("dailyId").style.fontWeight = "bold";
         }
-    if (calTtl == "week"){
-            document.getElementById("weeklyId").style.color = "black";
-            document.getElementById("weeklyId").style.fontWeight = "bold";
-        }
-    if (calTtl == "month"){
-            document.getElementById("monthlyId").style.color = "black";
-            document.getElementById("monthlyId").style.fontWeight = "bold";
-        }
+    }
+    var weekly =  document.getElementById('weeklyId');
+    if (typeof(weekly) != 'undefined' && weekly != null)
+    {
+        if (calTtl == "week"){
+                document.getElementById("weeklyId").style.color = "black";
+                document.getElementById("weeklyId").style.fontWeight = "bold";
+            }
+    }
+    var monthly =  document.getElementById('monthlyId');
+    if (typeof(monthly) != 'undefined' && monthly != null)
+    {
+        if (calTtl == "month"){
+                document.getElementById("monthlyId").style.color = "black";
+                document.getElementById("monthlyId").style.fontWeight = "bold";
+            }
+    }
+    var yearly =  document.getElementById('yearlyId');
+    if (typeof(yearly) != 'undefined' && yearly != null)
+    {
     if (calTtl == "year"){
             document.getElementById("yearlyId").style.color = "black";
             document.getElementById("yearlyId").style.fontWeight = "bold";
         }
+    }
     // Graph creating
     const data = {
             // Values x
@@ -74,4 +90,17 @@ function dailyGraph()
 			document.getElementById('chart_display'),
 			config
 			);
+}
+function print()
+{
+    var my_canvas = document.getElementById('chart_display')
+    let url = my_canvas.toDataURL();
+    // New tab to isolate canvas for printing
+    let win = window.open();
+    // 'img' element will show url as image
+    win.document.write("<img src='" + url + "' style='width:100%;'/>");
+    // Print calls after write
+    win.setTimeout(() => win.print(), 0);
+    // Close window after print
+    win.setTimeout(() => win.close(), 0);
 }
