@@ -41,11 +41,17 @@
 					   style="border-top-right-radius: 15% 50%;border-bottom-right-radius: 15% 50%;">Yearly</button>
 		   </form>
 	   </div>
-
-	   <div id="chart-containerId" class="chart-container" style="position: relative; height:70vh; width:90vw">
-		   <canvas id="chart_display"></canvas>
+	   <div id="print2">
+		   <div id="printthis" class='body'>
+			   <div id="chart-containerId" class="chart-container" style="position: relative; height:70vh; width:90vw; margin-bottom:5%;">
+				   <input name="b_print" type="button" class="ipt" onClick="print()" value=" Print graph " style="margin-left:3%">
+				   <canvas id="chart_display"></canvas>
+			   </div>
+		   </div>
 	   </div>
+
    </div>
 	<script src="{{ url_for('static', filename='/js/statics.js') }}"></script>
+
 	</body>
 </html>
