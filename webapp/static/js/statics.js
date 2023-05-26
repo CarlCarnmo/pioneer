@@ -91,6 +91,7 @@ function dailyGraph()
 			config
 			);
 }
+// Printing function
 function print()
 {
     var my_canvas = document.getElementById('chart_display')
