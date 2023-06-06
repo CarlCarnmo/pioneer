@@ -54,8 +54,8 @@ def main():
     db_month = [result for result in month]
     return render_template('index.html',db_month=db_month, db_rfids = rfids, db_check_data = check_data,
                            last_months=last_months)
-@app.route('/logbook2', methods=['GET', 'POST'])
-def logbook2():
+@app.route('/logbook', methods=['GET', 'POST'])
+def logbook():
     # Default sorting and table row values
     sort = "timestamp DESC"
     table_rows = 10
