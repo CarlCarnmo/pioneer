@@ -12,6 +12,50 @@ def hello():
     return redirect(url_for('main'))
 @app.route('/index', methods=['GET', 'POST'])
 def main():
+    choosen_month = "current_timestamp"
+    sortby = ""
+    if request.method == 'POST':
+        choosen = request.form.get('filter_month')
+        if choosen is not None:
+            choosen_month = f"date '{choosen}-01'"
+        sort_selected = request.form.get('filter_sortby')
+        if sort_selected == "rfid_high":
+            sortby = "ORDER BY rfid DESC"
+        elif sort_selected == "rfid_low":
+            sortby = "ORDER BY rfid ASC"
+    # Execute the SQL query
+    cur = conn.cursor()
+    # Get current month name and month days from database
+    cur.execute(f"SELECT TO_CHAR({choosen_month}, 'Mon') AS "'Month'", date_part( 'days', "
+        f"(date_trunc('month', {choosen_month}) + interval '1 month - 1 day'));")
+    month = cur.fetchall()
+    # Get all rfids in current month from database
+    cur.execute(f"SELECT DISTINCT rfid FROM esd_log.esd_check WHERE (timestamp >= date_trunc('month', {choosen_month})"
+                f"and timestamp < date_trunc('month', {choosen_month} + interval '1 month')) {sortby};")
+    rfids = cur.fetchall()
+    # Get esd results and time for current month from database
+    cur.execute("SELECT rfid, TO_CHAR(timestamp, 'YYYY-MM-DD HH24:MI:SS') AS formatted_timestamp, esd"
+                f" FROM esd_log.esd_check WHERE (timestamp >= date_trunc('month', {choosen_month})"
+                f"and timestamp < date_trunc('month', {choosen_month} + interval '1 month'));")
+    check_data = cur.fetchall()
+    # Get last 12 months from current month
+    cur.execute("WITH RECURSIVE "
+                f"cte AS ( SELECT date_trunc('month', now() - interval '12 month') AS period "
+                "UNION ALL "
+                f"SELECT period + INTERVAL '1 month' "
+                "FROM cte "
+                f"WHERE period < date_trunc('month', now()) ) "
+                "select "
+                "TO_CHAR(cte.period, 'YYYY-MM') "
+                "from cte "
+                "order by cte.period;")
+    last_months = cur.fetchall()
+    cur.close()
+    db_month = [result for result in month]
+    return render_template('index.html',db_month=db_month, db_rfids = rfids, db_check_data = check_data,
+                           last_months=last_months)
+@app.route('/logbook2', methods=['GET', 'POST'])
+def logbook2():
     # Default sorting and table row values
     sort = "timestamp DESC"
     table_rows = 10
@@ -54,12 +98,12 @@ def main():
             where_ = "WHERE (timestamp >= date_trunc('week', CURRENT_TIMESTAMP - interval '1 week') " \
                      "and timestamp < date_trunc('week', CURRENT_TIMESTAMP))"
         elif view == "last_month":
-            where_ = "WHERE (timestamp >= date_trunc('week', CURRENT_TIMESTAMP - interval '1 month') " \
+            where_ = "WHERE (timestamp >= date_trunc('month', CURRENT_TIMESTAMP - interval '1 month') " \
                      "and timestamp < date_trunc('month', CURRENT_TIMESTAMP))"
 
     # Execute the SQL query with formatted timestamp
     cur = conn.cursor()
-    cur.execute(f"SELECT rfid, esd, TO_CHAR(timestamp, 'YYYY-MM-DD HH:MI:SS') AS formatted_timestamp "
+    cur.execute(f"SELECT rfid, esd, TO_CHAR(timestamp, 'YYYY-MM-DD HH24:MI:SS') AS formatted_timestamp "
                 f"FROM esd_log.esd_check {where_} ORDER BY {sort};")
 
     # Fetch all the data
@@ -72,7 +116,7 @@ def main():
     db_array = [result for result in datatest]
 
     # Render the template with data and table_rows
-    return render_template('index.html', data=db_array, table_rows=table_rows)
+    return render_template('logbook.html', data=db_array, table_rows=table_rows)
 @app.route('/stats', methods=['GET', 'POST'])
 def stats():
     # Default statistic
@@ -135,6 +179,7 @@ def stats():
     esd_false = [row[3] for row in data]
     return render_template('statistics.html', labels=labels, esd_true=esd_true, esd_false=esd_false,
                            esd_total=esd_total, dgt=dgt, cal=cal)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
