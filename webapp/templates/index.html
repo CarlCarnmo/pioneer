@@ -6,76 +6,57 @@
 		<meta name='viewport' content='width=device-width, initial-scale=1'>
 		<link rel="stylesheet" href="{{ url_for('static', filename='/css/main.css') }}">
 		<script>
-			dbArray = []
-			{% for col in data %}
-			dbArray.push("{{col[0]}},{{col[1]}},{{col[2]}}")
-			dbArray.push("{{col[0]}},{{col[1]}},{{col[2]}}")
+			// Tranfer python variables to javascript
+			var month, days
+			rfid_array = []
+			check_data = []
+			months = []
+			{% for r in db_month %}
+			console.log("{{r[0]}}");
+			month = "{{r[0]}}";
+			days = {{r[1]}};
 			{% endfor %}
-			// Table colums and rows
-			var cols = 3;
-			var rows = {{ table_rows }}
-			var boxNames = []
-			// Count existing pages (Math.ceil make decimal number into integer)
-			var existingPages = Math.ceil( dbArray.length / rows );
-			var rows_in_choosen_page = [rows]
+			{% for id in db_rfids %}
+			rfid_array.push("{{id[0]}}")
+			{% endfor %}
+			{% for data in db_check_data %}
+			check_data.push(["{{data[0]}}", "{{data[1]}}", "{{data[2]}}"])
+			{% endfor %}
+			{% for mn in last_months %}
+			months.push("{{mn[0]}}")
+			{% endfor %}
 		</script>
 	</head>
 	<body>
 	<ul>
 		<menu_header>
-			<li><a href="{{ url_for('main') }}">Home</a></li>
-			<li><a href="{{ url_for('stats') }}">Statistics</a></li>
+			<li><a id="homepage" href="{{ url_for('main') }}">Home</a></li>
+			<li><a id="logbookpage" href="{{ url_for('logbook') }}">Logbook</a></li>
+			<li><a id="statisticspage" href="{{ url_for('stats') }}">Statistics</a></li>
 			<img src="{{url_for('static', filename='/img/veoneer_logo.png')}}" alt="Veoneer" align="right">
 		</menu_header>
 	</ul>
-	<hr class="hr1">
+   <hr class="hr1">
 	<div id="bodyId" class='body'>
-		<form class="form1" method="POST">
-			<div>
-				<select name="view_time" class="select_form1">
-					<option value="" disabled selected hidden>View by</option>
-					<option value="today">Today</option>
-					<option value="this_week">This week</option>
-					<option value="this_month">This month</option>
-					<option value="last_week">Last week</option>
-					<option value="last_month">Last month</option>
+		<div style="display: inline-block; width: 100%;">
+			<form id="filter_monthFORM" class="form4" method="POST">
+				<select id='filter_monthID' name="filter_month" class="select_form1">
+					<option value="" disabled selected hidden>Select month</option>
 				</select>
-			</div>
-			<div class="form_in">
-				<select name="sort_select" class="select_form1">
+			</form>
+			<form id="filter_sortbyFORM" class = "form4" method="POST">
+				<select id='filter_sortID' name="filter_sortby" class="select_form1">
 					<option value="" disabled selected hidden>Sort by</option>
-					<option value="time_high">Time (newest to oldest)</option>
-					<option value="time_low">Time (oldest to newest)</option>
 					<option value="rfid_high">Id (high)</option>
 					<option value="rfid_low">Id (low)</option>
-					<option value="esd_high">ESD (true first)</option>
-					<option value="esd_low">ESD (false first)</option>
 				</select>
-			</div>
-			<div class="form_in">
-				<select name="rows_form" class="select_form1">
-					<option value="" disabled selected hidden>Table rows</option>
-					<option value="10">10</option>
-					<option value="20">20</option>
-					<option value="40">40</option>
-				</select>
-			</div>
-			<button type="submit" class="form_in">Filter</button>
-		</form>
-		<div id="logBookId" class="logBook">
-			<div class="logBookHeader" style="border-top-left-radius: 15% 50%"><h3>Id</h3></div>
-			<div class="logBookHeader"><h3>ESD</h3></div>
-			<div class="logBookHeader" style="border-top-right-radius: 15% 50%"><h3>Time</h3></div>
+				<button type="submit" >Sort</button>
+			</form>
 		</div>
-
-	</div>
-	<div id="pageNumbersAreaId" class="pageNumbersArea">
-		<div id="previousArrow" class="left">
-			<img src="{{url_for('static', filename='/img/previous.png')}}" alt="Veoneer" align="right" onclick="previousArrow()">
-		</div>
-		<div id="numbersAreaId" class="center"></div>
-		<div id="nextArrow" class="right">
-			<img src="{{url_for('static', filename='/img/next.png')}}" alt="Veoneer" align="right" onclick="nextArrow()">
+		<input type="button" onClick="printdiv('bookBody')" value=" Print out " style="position:relative; left: 85%; top:2px;">
+		<div id="bookBody">
+			<div id="logbookId">
+			</div>
 		</div>
 	</div>
 	<script src="{{ url_for('static', filename='/js/main.js') }}"></script>

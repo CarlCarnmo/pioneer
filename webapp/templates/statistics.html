@@ -20,8 +20,9 @@
 	<body>
 	<ul>
 		<menu_header>
-			<li><a href="{{ url_for('main') }}">Home</a></li>
-			<li><a href="{{ url_for('stats') }}">Statistics</a></li>
+			<li><a id="homepage" href="{{ url_for('main') }}">Home</a></li>
+			<li><a id="logbookpage" href="{{ url_for('logbook') }}">Logbook</a></li>
+			<li><a id="statisticspage" href="{{ url_for('stats') }}">Statistics</a></li>
 			<img src="{{url_for('static', filename='/img/veoneer_logo.png')}}" alt="Veoneer" align="right">
 		</menu_header>
 	</ul>
