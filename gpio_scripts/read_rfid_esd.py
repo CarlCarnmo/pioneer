@@ -1,104 +1,189 @@
-import RPi.GPIO as GPIO
+import binascii
 import time
-import random
+import signal
+import sys
+import warnings
 import psycopg2
-from pioneer import config
+import RPi.GPIO as GPIO
 
-# Configs
-# RFID_IO = 19
-# ESD_IO = 26
-# RED_LED = 16
-# YELLOW_LED = 20
-# GREEN_LED = 21
-# psql_host = "localhost"
-# psql_database = "pioneer"
-# psql_user = "pioneer"
-# psql_password = "password"
+import Adafruit_PN532 as PN532
+
+# Ignore warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+# PN532 configuration for a Raspberry Pi GPIO:
+CS = 5
+SCLK = 11
+MOSI = 10
+MISO = 9
+
+# Configuration for the ESD check buttons and LEDs
+BUTTON_PASS_PIN = 2
+BUTTON_FAIL_PIN = 3
+LED_SUCCESS_PIN = 14
+LED_FAILURE_PIN = 15
+
+# Configuration for the PostgreSQL database
+DB_HOST = "localhost"
+DB_NAME = "pioneer"
+DB_USER = "pioneer"
+DB_PASSWORD = "password"
+
+# Configure the time to wait for the ESD check in seconds
+WAIT_TIME = 5
+BUTTON_CHECK_INTERVAL = 0.1  # Interval to check button states during the wait time
 
 # Connect to the PostgreSQL database
 def connect_to_database():
-    connection = psycopg2.connect(
-        host=config.psql_host,
-        database=config.psql_database,
-        user=config.psql_user,
-        password=config.psql_password
-    )
-    return connection
+    # Establish a connection to the PostgreSQL database
+    conn = psycopg2.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD)
+    return conn
 
-# Insert the RFID and ESD status into the database
-def insert_entry(connection, rfid, esd_status):
-    cursor = connection.cursor()
-    cursor.execute("INSERT INTO esd_log.esd_check (rfid, esd) VALUES (%s, %s)", (rfid, esd_status))
-    connection.commit()
-    print(f"Data sent to database: RFID = {rfid}, ESD Status = {esd_status}")
+# Function to insert an entry into the PostgreSQL database
+def insert_entry(conn, rfid, esd_status):
+    try:
+        cur = conn.cursor()
+        cur.execute("INSERT INTO esd_log.esd_check (rfid, esd) VALUES (%s, %s)", (rfid, esd_status))
+        conn.commit()
+        print("Data inserted successfully")
+        return True
+    except (Exception, psycopg2.Error) as error:
+        print("Error while inserting data into PostgreSQL", error)
+        return False
 
-# Generate a random RFID number
-def generate_rfid():
-    rfid = random.randint(100000, 999999)
-    print(f"RFID generated: {rfid}")
-    return rfid
+# Initialize the PN532 reader
+def initialize_pn532():
+    while True:
+        try:
+            # Create and initialize an instance of the PN532 class
+            pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
+            pn532.begin()
+            pn532.SAM_configuration()
+            return pn532
+        except RuntimeError as e:
+            print('Failed to detect the PN532:', str(e))
+            continue
 
-# Generate a random ESD check status (True or False)
-def generate_esd_status():
-    esd_status = random.choice([True, False])
-    print(f"ESD check generated: {esd_status}")
+# Initialize the GPIO pins for the buttons and LEDs
+def initialize_gpio_pins():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(BUTTON_PASS_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(BUTTON_FAIL_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(LED_SUCCESS_PIN, GPIO.OUT, initial=GPIO.LOW)  # Set initial state to low
+    GPIO.setup(LED_FAILURE_PIN, GPIO.OUT, initial=GPIO.LOW)  # Set initial state to low
+
+# Perform the ESD check
+def perform_esd_check():
+    print('Performing ESD check...')
+    start_time = time.time()
+    esd_status = None
+    while time.time() - start_time < WAIT_TIME:
+        # Check button states periodically
+        if not GPIO.input(BUTTON_PASS_PIN):
+            esd_status = True
+            break
+        elif not GPIO.input(BUTTON_FAIL_PIN):
+            esd_status = False
+            break
+        time.sleep(BUTTON_CHECK_INTERVAL)
     return esd_status
 
-# Reset the RFID, ESD status, and start_time variables
-def reset():
-    global rfid, esd_status, start_time
-    rfid = None
-    esd_status = None
-    start_time = None
-    print("Resetting...")
+# Handle RFID scanning and database insertion
+def handle_rfid_scan(pn532, conn):
+    # Wait for a card to be available
+    uid = pn532.read_passive_target()
+    # Try again if no card found
+    if uid is None:
+        return
 
-# Callback function for RFID button press
-def rfid_button_callback(channel):
-    global rfid, start_time
-    if rfid is None:
-        rfid = generate_rfid()
-        if start_time is None:
-            start_time = time.time()
+    # Print the UID of the card
+    print('Card UID:', binascii.hexlify(uid).decode('utf-8'))
 
-# Callback function for ESD button press
-def esd_button_callback(channel):
-    global esd_status, start_time
-    if esd_status is None:
-        esd_status = generate_esd_status()
-        if start_time is None:
-            start_time = time.time()
+    # Store the RFID value
+    rfid = binascii.hexlify(uid).decode('utf-8')
 
-# Set up GPIO
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(config.RFID_IO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(config.ESD_IO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    # Disable accepting more RFID scans until the process is complete
+    pn532.SAM_configuration()
 
-# Add event detection for button presses
-GPIO.add_event_detect(config.RFID_IO, GPIO.FALLING, callback=rfid_button_callback, bouncetime=200)
-GPIO.add_event_detect(config.ESD_IO, GPIO.FALLING, callback=esd_button_callback, bouncetime=200)
+    # Blink the success LED three times
+    for _ in range(3):
+        GPIO.output(LED_SUCCESS_PIN, GPIO.HIGH)
+        time.sleep(0.2)
+        GPIO.output(LED_SUCCESS_PIN, GPIO.LOW)
+        time.sleep(0.2)
 
-# Initialize the database connection
-db_connection = connect_to_database()
+    # Perform the ESD check
+    esd_status = perform_esd_check()
 
-# Initialize RFID, ESD status, and start_time variables
-rfid = None
-esd_status = None
-start_time = None
+    print('ESD Check Result:', esd_status)
 
-try:
+    # Only insert the entry into the PostgreSQL database if both RFID scan and ESD check are done correctly
+    if uid is not None and esd_status is not None:
+        # Blink the failure LED twice if ESD check fails
+        if not esd_status:
+            for _ in range(2):
+                GPIO.output(LED_FAILURE_PIN, GPIO.HIGH)
+                time.sleep(0.5)
+                GPIO.output(LED_FAILURE_PIN, GPIO.LOW)
+                time.sleep(0.5)
+
+        # Insert the entry into the PostgreSQL database
+        if insert_entry(conn, rfid, esd_status):
+            # Blink the success LED twice with a longer duration if ESD check passes
+            if esd_status:
+                for _ in range(2):
+                    GPIO.output(LED_SUCCESS_PIN, GPIO.HIGH)
+                    time.sleep(0.5)
+                    GPIO.output(LED_SUCCESS_PIN, GPIO.LOW)
+                    time.sleep(0.5)
+    else:
+        print('Skipping database insertion.')
+
+    # Enable accepting RFID scans again
+    pn532.SAM_configuration()
+
+
+def main():
+    signal.signal(signal.SIGINT, close)
+    print('PN532 NFC RFID 13.56MHz Card Reader')
+
+    # Connect to the PostgreSQL database
+    conn = connect_to_database()
+
+    # Initialize GPIO pins
+    initialize_gpio_pins()
+
+    # Flag to keep track of RFID scan
+    rfid_scanned = False
+
     while True:
-        if start_time is not None and time.time() - start_time > 10:
-            print("10 seconds have passed.")
-            reset()
+        try:
+            # Initialize the PN532 reader
+            pn532 = initialize_pn532()
 
-        if rfid is not None and esd_status is not None:
-            insert_entry(db_connection, rfid, esd_status)
-            reset()
+            handle_rfid_scan(pn532, conn)
 
-        time.sleep(0.1)
+            rfid_scanned = True
 
-except KeyboardInterrupt:
-    print("Interrupted by user")
-finally:
+        except RuntimeError as e:
+            error_messages = [
+                'Did not receive expected ACK from PN532!',
+                'Response frame preamble does not contain 0x00FF!',
+                'Response checksum did not match expected value!',
+                'Response length checksum did not match length!',
+                'Response frame does not start with 0x01!'
+            ]
+            if str(e) in error_messages:
+                print('Scan failed. Please try again.')
+                continue
+            else:
+                raise e
+
+
+def close(signal, frame):
     GPIO.cleanup()
-    db_connection.close()
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
