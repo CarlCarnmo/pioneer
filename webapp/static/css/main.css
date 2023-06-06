@@ -4,6 +4,12 @@ body
 {
 	background-color: white;
 }
+@media print{
+    body{
+        zoom: 50%;
+        transform-origin: 0 0;
+    }
+}
 h1 {
 	text-align: center;
 }
@@ -30,8 +36,8 @@ li {
 	background-color: white;
 	color: black;
 	float: left;
-	height: 40px;
-	width: 120px;
+	height: 45px;
+	width: 140px;
 	margin-top: 40px;
 }
 li a {
@@ -113,6 +119,10 @@ bh {
     display: flex;
 }
 .form3{
+    margin-left: 3%;
+}
+.form4{
+    float: left;
     margin-left: 3%;
 }
 .select_form1{
