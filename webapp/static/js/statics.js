@@ -2,6 +2,8 @@ window.onload = dailyGraph();
 // Statistics graph function
 function dailyGraph()
 {
+    var menu_button = document.getElementById("statisticspage");
+    menu_button.style = "font-weight: bold; color: #489d93; text-shadow: 1px 1px 1px black,2px 5px 2px #F1F1F1; font-size: 28px;  padding: 10px 0px 0px;"
     // Handle menu color
     var daily =  document.getElementById('dailyId');
     if (typeof(daily) != 'undefined' && daily != null)
