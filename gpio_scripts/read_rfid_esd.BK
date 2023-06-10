@@ -16,12 +16,12 @@ CS = 5
 SCLK = 11
 MOSI = 10
 MISO = 9
-SPI_CLOCK = 1000000  # Clock frequency in Hz. Default = 1 MHz
 
 # Configuration for the ESD check buttons and LEDs
 BUTTON_PASS_PIN = 2
 BUTTON_FAIL_PIN = 3
-BEEPER_GREENLED_PIN = 18
+LED_SUCCESS_PIN = 14
+LED_FAILURE_PIN = 15
 
 # Configuration for the PostgreSQL database
 DB_HOST = "localhost"
@@ -48,7 +48,7 @@ def insert_entry(conn, rfid, esd_status):
         print("Data inserted successfully")
         return True
     except (Exception, psycopg2.Error) as error:
-        print("Error while inserting data into PostgreSQL:", error)
+        print("Error while inserting data into PostgreSQL", error)
         return False
 
 # Initialize the PN532 reader
@@ -56,7 +56,7 @@ def initialize_pn532():
     while True:
         try:
             # Create and initialize an instance of the PN532 class
-            pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO, clk=SPI_CLOCK)
+            pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
             pn532.begin()
             pn532.SAM_configuration()
             return pn532
@@ -69,7 +69,8 @@ def initialize_gpio_pins():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(BUTTON_PASS_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(BUTTON_FAIL_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(BEEPER_GREENLED_PIN, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup(LED_SUCCESS_PIN, GPIO.OUT, initial=GPIO.LOW)  # Set initial state to low
+    GPIO.setup(LED_FAILURE_PIN, GPIO.OUT, initial=GPIO.LOW)  # Set initial state to low
 
 # Perform the ESD check
 def perform_esd_check():
@@ -104,11 +105,12 @@ def handle_rfid_scan(pn532, conn):
     # Disable accepting more RFID scans until the process is complete
     pn532.SAM_configuration()
 
-    # Blink the success LED and beep once
-    GPIO.output(BEEPER_GREENLED_PIN, GPIO.HIGH)
-    time.sleep(0.1)
-    GPIO.output(BEEPER_GREENLED_PIN, GPIO.LOW)
-    time.sleep(0.1)
+    # Blink the success LED three times
+    for _ in range(3):
+        GPIO.output(LED_SUCCESS_PIN, GPIO.HIGH)
+        time.sleep(0.2)
+        GPIO.output(LED_SUCCESS_PIN, GPIO.LOW)
+        time.sleep(0.2)
 
     # Perform the ESD check
     esd_status = perform_esd_check()
@@ -117,12 +119,23 @@ def handle_rfid_scan(pn532, conn):
 
     # Only insert the entry into the PostgreSQL database if both RFID scan and ESD check are done correctly
     if uid is not None and esd_status is not None:
+        # Blink the failure LED twice if ESD check fails
+        if not esd_status:
+            for _ in range(2):
+                GPIO.output(LED_FAILURE_PIN, GPIO.HIGH)
+                time.sleep(0.5)
+                GPIO.output(LED_FAILURE_PIN, GPIO.LOW)
+                time.sleep(0.5)
+
         # Insert the entry into the PostgreSQL database
         if insert_entry(conn, rfid, esd_status):
-            # Database insertion successful
-            pass
-        else:
-            print('Error inserting data into the database.')
+            # Blink the success LED twice with a longer duration if ESD check passes
+            if esd_status:
+                for _ in range(2):
+                    GPIO.output(LED_SUCCESS_PIN, GPIO.HIGH)
+                    time.sleep(0.5)
+                    GPIO.output(LED_SUCCESS_PIN, GPIO.LOW)
+                    time.sleep(0.5)
     else:
         print('Skipping database insertion.')
 
@@ -140,12 +153,17 @@ def main():
     # Initialize GPIO pins
     initialize_gpio_pins()
 
+    # Flag to keep track of RFID scan
+    rfid_scanned = False
+
     while True:
         try:
             # Initialize the PN532 reader
             pn532 = initialize_pn532()
 
             handle_rfid_scan(pn532, conn)
+
+            rfid_scanned = True
 
         except RuntimeError as e:
             error_messages = [
@@ -159,11 +177,13 @@ def main():
                 print('Scan failed. Please try again.')
                 continue
             else:
-                print('Unexpected error:', e)
+                raise e
+
 
 def close(signal, frame):
     GPIO.cleanup()
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()
