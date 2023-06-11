@@ -1,4 +1,5 @@
 window.onload = book();
+// book function make logbook table for current or chosen month
 function book()
 {
     var menu_button = document.getElementById("homepage");
@@ -22,12 +23,12 @@ function book()
     // Change first box innerText in first row with month name and change box size
     document.getElementById('box_calendar0').style = 'color: black; background: #f2f2f2; width: 60px; height: 35px; font-size: 24px; border: 1px solid; border-color: grey; float: left';
     document.getElementById('box_calendar0').innerText = month;
-    // Logbook row for every rfid
+    // Make row for every rfid
     for (var i = 0; i <= rfid_array.length - 1; i++)
     {
         var row_data = document.createElement('div');
         row_data.style = 'position: static; height: 35px; min-width: 1300px; width: 100%;';
-        // Row boxes equally days in month
+        // Make row boxes equally days in month
         for (var a = 0; a <= days; a++)
         {
             var book_box = document.createElement('div');
@@ -91,14 +92,14 @@ function book()
         logbook.appendChild(nodata)
     }
 }
-
+// This function print out chosen div element
 function printdiv(printpage) {
             // Make html page for printing
             var html_start = "<html><head>";
             var head_inner = document.head.innerHTML;
             var body_start = "</head><body>"
             var footstr = "</body></html>";
-            // Get all elements in choosen div
+            // Get all elements in chosen div
             var newstr = document.all.item(printpage).innerHTML;
             // Save previous elements in body
             var oldstr = document.body.innerHTML;
@@ -114,4 +115,4 @@ function printdiv(printpage) {
             // Get back previous page
             document.body.innerHTML = oldstr;
             return false;
-            }
+}
