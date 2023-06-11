@@ -6,9 +6,9 @@
 		<meta name='viewport' content='width=device-width, initial-scale=1'>
 		<link rel="stylesheet" href="{{ url_for('static', filename='/css/main.css') }}">
 		<script>
+			// Passing sql data from python to javascript
 			dbArray = []
 			{% for col in data %}
-			dbArray.push("{{col[0]}},{{col[1]}},{{col[2]}}")
 			dbArray.push("{{col[0]}},{{col[1]}},{{col[2]}}")
 			{% endfor %}
 			// Table colums and rows
@@ -17,7 +17,7 @@
 			var boxNames = []
 			// Count existing pages (Math.ceil make decimal number into integer)
 			var existingPages = Math.ceil( dbArray.length / rows );
-			var rows_in_choosen_page = [rows]
+			var rows_in_chosen_page = [rows]
 		</script>
 	</head>
 	<body>

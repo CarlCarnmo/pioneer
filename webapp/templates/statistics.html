@@ -7,8 +7,10 @@
 		<link rel="stylesheet" href="{{ url_for('static', filename='/css/main.css') }}">
 		<script src="{{ url_for('static', filename='/js/chart.js') }}"></script>
 		<script>
+			// Passing sql data from python to javascript
 			calTtl = "{{cal}}"
 			dgtTtl = "{{dgt}}"
+			// Sum of test results
 			sum_total = {{esd_total}}.reduce((a, b) => a + b, 0);
 			sum_esd_true = {{esd_true}}.reduce((a, b) => a + b, 0);
 			sum_esd_false = {{esd_false}}.reduce((a, b) => a + b, 0);
@@ -52,7 +54,7 @@
 	   </div>
 
    </div>
-	<script src="{{ url_for('static', filename='/js/statics.js') }}"></script>
+	<script src="{{ url_for('static', filename='/js/statistics.js') }}"></script>
 
 	</body>
 </html>
