@@ -7,17 +7,17 @@
 		<link rel="stylesheet" href="{{ url_for('static', filename='/css/main.css') }}">
 		<script>
 			// Passing sql data from python to javascript
-			dbArray = []
+			var dbArray = [];
 			{% for col in data %}
-			dbArray.push("{{col[0]}},{{col[1]}},{{col[2]}}")
+			dbArray.push("{{col[0]}},{{col[1]}},{{col[2]}}");
 			{% endfor %}
-			// Table colums and rows
+			// Table columns and rows
 			var cols = 3;
-			var rows = {{ table_rows }}
-			var boxNames = []
+			var rows = {{ table_rows }};
+			var boxNames = [];
 			// Count existing pages (Math.ceil make decimal number into integer)
-			var existingPages = Math.ceil( dbArray.length / rows );
-			var rows_in_chosen_page = [rows]
+			var existingPages = Math.ceil(dbArray.length / rows);
+			var rows_in_chosen_page = [rows];
 		</script>
 	</head>
 	<body>
@@ -68,7 +68,6 @@
 			<div class="logBookHeader"><h3>ESD</h3></div>
 			<div class="logBookHeader" style="border-top-right-radius: 15% 50%"><h3>Time</h3></div>
 		</div>
-
 	</div>
 	<div id="pageNumbersAreaId" class="pageNumbersArea">
 		<div id="previousArrow" class="left">
