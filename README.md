@@ -2,10 +2,12 @@
 
 This project aims to create a system for monitoring ESD (Electrostatic Discharge) and RFID (Radio-Frequency Identification) events using a Raspberry Pi. The system involves a Python script, a web server, and hardware components (ESD sensor and RFID reader).
 
+
 ### Hardware Requirements
 - Raspberry Pi
-- ESD sensor (pending arrival)
-- RFID reader (pending arrival)
+- ESD sensor
+- RFID reader
+
 
 ### Software Requirements
 - Raspberry Pi OS (latest version)
@@ -15,89 +17,157 @@ This project aims to create a system for monitoring ESD (Electrostatic Discharge
 - Python libraries: `psycopg2`, `RPi-GPIO` (for hardware interaction)
 - Web requirements: `flask`
 
+
 ### Step-by-Step Installation and Setup
 
-1. **First-time Start-up**
-   - Install the latest 'Raspberry Pi OS' using the Raspberry Pi Imager.
-   - Run the following command to update the system:
+Follow these steps to install and set up the ESD and RFID monitoring system using a Raspberry Pi.
+
+
+1. **Raspberry Pi OS Installation**
+   - Download the latest version of Raspberry Pi OS from the official Raspberry Pi website (Or select it in the imager).
+   - Use the Raspberry Pi Imager to write the OS image onto an SD card.
+   - Insert the SD card into the Raspberry Pi and power it on.
+
+
+2. **System Update**
+   - Connect to the Raspberry Pi via SSH or use a monitor and keyboard to access the terminal.
+   - Update the system packages by running the following commands:
      ```
-     sudo apt update && sudo apt full-upgrade
-     ```
-   - Create a user named 'pioneer' for the project (not as --system):
-     ```
-     sudo adduser pioneer
+     sudo apt update
+     sudo apt upgrade
      ```
 
-2. **Set-up Remote Desktop(Optional)**
-   - Install XRDP to enable Windows Remote Desktop access:
-     ```
-     sudo apt install xrdp
-     ```
-   - Use the IP of the Raspberry Pi (`hostname -I`) and the 'pioneer' user to connect via Remote Desktop.
 
-3. **Enable SSH (optional)**
-   - To use only SSH, enable it in the Pi's configuration and connect (username@IP)
-
-4. **Install and Set-up PostgreSQL**
+3. **PostgreSQL Installation**
    - Install PostgreSQL and required packages:
      ```
      sudo apt install postgresql libpq-dev postgresql-client postgresql-client-common -y
      ```
    - Switch to the 'postgres' user:
      ```
-     su postgres
+     sudo su - postgres
      ```
-   - Create a PostgreSQL user 'pioneer':
+   - Create a new PostgreSQL user 'pioneer':
      ```
      createuser pioneer -P --interactive
      ```
    - Create a database 'pioneer' (for accessing 'psql' from the 'pioneer' user):
      ```
-     psql
-     create database pioneer;
+     createdb pioneer
      ```
-   - Switch to the 'pioneer' user:
+   - Exit the 'postgres' user:
      ```
-     su pioneer
+     exit
      ```
-   - Create the 'esd_log' schema:
+
+
+4. **Python and Libraries Installation**
+   - Install the necessary Python packages and libraries:
      ```
-     psql
-     CREATE SCHEMA IF NOT EXISTS esd_log;
+     sudo apt install python3-psycopg2 python3-rpi.gpio python3-pip -y
+     sudo pip3 install adafruit-pn532
      ```
-   - Create the 'esd_check' table within the 'esd_log' schema:
+
+
+5. **Project Setup**
+   - Clone the project repository to your Raspberry Pi:
      ```
-     CREATE TABLE esd_log.esd_check (
-         ID SERIAL PRIMARY KEY,
-         RFID VARCHAR(255) NOT NULL,
-         ESD BOOLEAN NOT NULL,
-         timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-     );
+     git clone <repository-url>
      ```
-5. **Install remaining requirements**
-   - Psycopg2: PostgreSQL adapter for Python.
+   - Navigate to the project directory:
      ```
-     sudo apt install python3-psycopg2
+     cd <project-directory>
      ```
-   - Gunicorn: Webserver.
+   - Configure the database connection:
+     - Open the `config.py` file and modify the following variables to match your PostgreSQL configuration:
+       ```
+       DB_HOST = "localhost"
+       DB_NAME = "pioneer"
+       DB_USER = "pioneer"
+       DB_PASSWORD = "password"
+       ```
+   - Optionally, adjust any other configuration variables in the `config.py` file as needed.
+   - The configs for the rfid reader script is in the read_rfid_esd.py.
+
+
+6. **Database Setup**
+   - Create the required schema and table in the PostgreSQL database:
+     - Access the PostgreSQL shell:
+       ```
+       sudo su - postgres
+       psql
+       ```
+     - Within the PostgreSQL shell, create the schema and table:
+       ```
+       CREATE SCHEMA IF NOT EXISTS esd_log;
+       CREATE TABLE esd_log.esd_check (
+           ID SERIAL PRIMARY KEY,
+           RFID VARCHAR(255) NOT NULL,
+           ESD BOOLEAN NOT NULL,
+           timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+       );
+       ```
+     - Exit the PostgreSQL shell:
+       ```
+       \q
+       exit
+       ```
+
+       
+7. **Start the Gunicorn Server**
+   - Install Gunicorn, a Python WSGI HTTP server:
      ```
      sudo apt install gunicorn
      ```
-   - Flask: web application framework.
+   - Start the Gunicorn server to run the web application:
      ```
-     sudo apt install python3-flask
+     gunicorn -w 4 -b localhost:4000 app:app
      ```
-   
+   - The web application will now be accessible at http://localhost:4000.
+
+
+8. **Run the Application**
+   - Start the ESD and RFID script:
+     ```
+     python3 esd_rfid_esd.py
+     ```
+   - The system will continuously monitor the RFID reader and store the RFID and ESD data in the PostgreSQL database.
+
+
+9. **Access the Web Interface**
+   - Open a web browser on any device connected to the same network as the Raspberry Pi.
+   - Enter the IP address of the Raspberry Pi in the browser's address bar.
+   - The web interface should be accessible, displaying the ESD and RFID monitoring data.
+
+By following these steps, you will have successfully installed and set up the ESD and RFID monitoring system on your Raspberry Pi.
+
 
 ### Configuration
 
 In the code, modify the following variables to match your configuration:
 
-- `RFID_IO`: GPIO pin connected to the RFID reader.
-- `ESD_IO`: GPIO pin connected to the ESD sensor.
-- `RED_LED`, `YELLOW_LED`, `GREEN_LED`: GPIO pins connected to the LED buttons.
-- `psql_host`, `psql_database`, `psql_user`, `psql_password`: PostgreSQL database connection details.
-- `timeout`: Time limit in seconds for waiting for the ESD check after the RFID scan.
+#### PN532 Configuration
+- `CS`: GPIO pin for Chip Select (CS) connection.
+- `SCLK`: GPIO pin for Serial Clock (SCLK) connection.
+- `MOSI`: GPIO pin for Master Output Slave Input (MOSI) connection.
+- `MISO`: GPIO pin for Master Input Slave Output (MISO) connection.
+- `SPI_CLOCK`: Clock frequency in Hz for the SPI communication. Default is 1 MHz.
+
+#### ESD Check Buttons and LEDs Configuration
+- `BUTTON_PASS_PIN`: GPIO pin for the pass button connection.
+- `BUTTON_FAIL_PIN`: GPIO pin for the fail button connection.
+- `BEEPER_GREENLED_PIN`: GPIO pin for the beeper and green LED connection.
+
+#### PostgreSQL Database Configuration
+- `DB_HOST`: Hostname or IP address of the PostgreSQL database server.
+- `DB_NAME`: Name of the database to connect to.
+- `DB_USER`: Username to use for connecting to the database.
+- `DB_PASSWORD`: Password for the specified database user.
+
+#### ESD Check Configuration
+- `WAIT_TIME`: Time to wait for the ESD check in seconds.
+- `BUTTON_CHECK_INTERVAL`: Interval to check button states during the wait time.
+
 
 ### Usage
 
@@ -111,19 +181,11 @@ In the code, modify the following variables to match your configuration:
 5. The system will store the RFID number and ESD check status in the PostgreSQL database.
 6. After 10 seconds of inactivity, the system will reset and wait for a new RFID scan and ESD check.
 
-### Known Issues
-
-- The script currently relies on button presses for simulation if the hardware components are not available. Replace the button callbacks with appropriate code when the actual RFID reader and ESD sensor are connected.
-
-**Temporary Simulation Functions**
-   - Until the RFID reader and ESD sensor arrive, simulate the functions with the following temporary simulation functions:
-     - `generate_rfid_check()`: Generates an RFID check when a button is pressed. Hold the button to simulate a failed RFID check.
-     - `generate_esd_check()`: Press the button once to generate an ESD check as True. Hold the button to generate an ESD check as False.
-
 
 ### Contributing
 
 Contributions are welcome! If you encounter any issues or have suggestions for improvements, please submit an issue or a pull request.
+
 
 ### License
 
