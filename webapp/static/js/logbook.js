@@ -28,15 +28,23 @@ function loadLogBook()
         }
     }
     // Page numbers for browsing
-    for (var i = 1; i <= existingPages; i++)
+    if (existingPages > 5)
     {
-        var pageNumber = document.createElement('a');
-        pageNumber.id = "pagenumber" + i
-        pageNumber.innerText = i;
-        pageNumber.style = "color: #666666; margin: 5px; font-size: 25px; font-family: Monaco, Monospace; float: none";
-        let num = i;
-        pageNumber.onclick = function(){changeSide(num)};
-        numbersArea.appendChild(pageNumber);
+        for (var i = 1; i <= existingPages; i++)
+        {
+            var pageNumber = document.createElement('a');
+            pageNumber.id = "pagenumber" + i
+            pageNumber.innerText = i;
+            pageNumber.style = "color: #666666; margin: 5px; font-size: 25px; font-family: Monaco, Monospace; float: none";
+            let num = i;
+            pageNumber.onclick = function(){changeSide(num)};
+            numbersArea.appendChild(pageNumber);
+        }
+        // Hide browsing numbers larger than 5
+        for (var i = 6; i <= existingPages; i++)
+        {
+            document.getElementById('pagenumber' + i).style.display = 'none'
+        }
     }
     var page1 = document.getElementById("pagenumber1");
     page1.style = "color: #489d93; margin: 5px; font-size: 32px; font-family: Monaco, Monospace; font-weight: bold; float: none";
@@ -56,6 +64,47 @@ function changeSide(pageNum)
         document.getElementById("pagenumber" + i).style = "color: #666666; margin: 5px; font-size: 25px; font-family: Monaco, Monospace;";
     }
     document.getElementById("pagenumber" + pageNum).style = "color: #489d93; margin: 5px; font-size: 32px; font-family: Monaco, Monospace; font-weight: bold";
+
+    if (pageNum < 4)
+    {
+        for (var i = 6; i <= existingPages; i++)
+        {
+            document.getElementById('pagenumber' + i).style.display = 'none'
+        }
+    }
+    else if(pageNum == existingPages - 1)
+    {
+        for (var i = 1; i <= existingPages; i++)
+        {
+            document.getElementById('pagenumber' + i).style.display = 'none'
+        }
+        for (var i = pageNum - 2; i <= pageNum + 1; i++)
+        {
+            document.getElementById('pagenumber' + i).style.display = 'inline'
+        }
+    }
+    else if(pageNum > existingPages - 1)
+    {
+        for (var i = 1; i <= existingPages; i++)
+        {
+            document.getElementById('pagenumber' + i).style.display = 'none'
+        }
+        for (var i = pageNum - 2; i <= existingPages; i++)
+        {
+            document.getElementById('pagenumber' + i).style.display = 'inline'
+        }
+    }
+    else
+    {
+        for (var i = 1; i <= existingPages; i++)
+        {
+            document.getElementById('pagenumber' + i).style.display = 'none'
+        }
+        for (var i = pageNum - 2; i <= pageNum + 2; i++)
+        {
+            document.getElementById('pagenumber' + i).style.display = 'inline'
+        }
+    }
     // Make counting for end and new_rows.
     // end is used in loop for new data filling
     // new_rows is used for new logbook making
