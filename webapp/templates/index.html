@@ -7,23 +7,23 @@
 		<link rel="stylesheet" href="{{ url_for('static', filename='/css/main.css') }}">
 		<script>
 			// Passing sql data from python to javascript
-			var month, days
-			rfid_array = []
-			check_data = []
-			months = []
+			var month, days;
+			var rfid_array = [];
+			var check_data = [];
+			var months = [];
 			{% for r in db_month %}
 			console.log("{{r[0]}}");
 			month = "{{r[0]}}";
 			days = {{r[1]}};
 			{% endfor %}
 			{% for id in db_rfids %}
-			rfid_array.push("{{id[0]}}")
+			rfid_array.push("{{id[0]}}");
 			{% endfor %}
 			{% for data in db_check_data %}
-			check_data.push(["{{data[0]}}", "{{data[1]}}", "{{data[2]}}"])
+			check_data.push(["{{data[0]}}", "{{data[1]}}", "{{data[2]}}"]);
 			{% endfor %}
 			{% for mn in last_months %}
-			months.push("{{mn[0]}}")
+			months.push("{{mn[0]}}");
 			{% endfor %}
 		</script>
 	</head>
